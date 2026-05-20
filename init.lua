@@ -99,7 +99,7 @@ do
   vim.g.maplocalleader = ' '
 
   -- Set to true if you have a Nerd Font installed and selected in the terminal
-  vim.g.have_nerd_font = false
+  vim.g.have_nerd_font = true
 
   -- [[ Setting options ]]
   --  See `:help vim.o`
@@ -383,18 +383,33 @@ do
   -- change the command under that to load whatever the name of that colorscheme is.
   --
   -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-  vim.pack.add { gh 'folke/tokyonight.nvim' }
+  -- vim.pack.add { gh 'folke/tokyonight.nvim' }
   ---@diagnostic disable-next-line: missing-fields
-  require('tokyonight').setup {
-    styles = {
-      comments = { italic = false }, -- Disable italics in comments
-    },
+  -- vim.pack.add { gh 'projekt0n/github-nvim-theme' }
+  -- require('github-theme').setup {
+  -- You can pass specific configuration options here if you want
+  -- For example, changing the style of comments or keywords
+  -- }
+  -- require('tokyonight').setup {
+  --   styles = {
+  --     comments = { italic = true }, -- Disable italics in comments
+  --   },
+  -- }
+
+  vim.pack.add {
+    'https://github.com/navarasu/onedark.nvim',
   }
+  require('onedark').setup {
+    style = 'darker',
+  }
+  require('onedark').load()
 
   -- Load the colorscheme here.
   -- Like many other themes, this one has different styles, and you could load
   -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-  vim.cmd.colorscheme 'tokyonight-night'
+  -- vim.cmd.colorscheme 'tokyonight-night'
+  -- vim.cmd.colorscheme 'github_dark'
+  vim.cmd.colorscheme 'onedark'
 
   -- Highlight todo, notes, etc in comments
   vim.pack.add { gh 'folke/todo-comments.nvim' }
@@ -687,8 +702,8 @@ do
   ---@type table<string, vim.lsp.Config>
   local servers = {
     -- clangd = {},
-    -- gopls = {},
-    -- pyright = {},
+    gopls = {},
+    pyright = {},
     -- rust_analyzer = {},
     --
     -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -698,6 +713,8 @@ do
     -- ts_ls = {},
 
     stylua = {}, -- Used to format Lua code
+
+    tailwindcss = {},
 
     -- Special Lua Config, as recommended by neovim help docs
     lua_ls = {
@@ -753,9 +770,19 @@ do
   -- You can press `g?` for help in this menu.
   local ensure_installed = vim.tbl_keys(servers or {})
   vim.list_extend(ensure_installed, {
-    -- You can add other tools here that you want Mason to install
-  })
+    -- Python
+    'black', -- Formatter
+    'isort', -- Import sorter
+    'ruff', -- Extremely fast linter
 
+    -- TypeScript/JavaScript/React
+    'prettierd', -- Fast formatter
+    'eslint_d', -- Fast linter
+
+    -- Go
+    'golangci-lint', -- Go linter
+    'goimports', -- Formats and organizes Go imports
+  })
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
   for name, server in pairs(servers) do
@@ -776,8 +803,8 @@ do
     format_on_save = function(bufnr)
       -- You can specify filetypes to autoformat on save here:
       local enabled_filetypes = {
-        -- lua = true,
-        -- python = true,
+        lua = true,
+        python = true,
       }
       if enabled_filetypes[vim.bo[bufnr].filetype] then
         return { timeout_ms = 500 }
@@ -790,12 +817,16 @@ do
     },
     -- You can also specify external formatters in here.
     formatters_by_ft = {
-      -- rust = { 'rustfmt' },
-      -- Conform can also run multiple formatters sequentially
-      -- python = { "isort", "black" },
-      --
-      -- You can use 'stop_after_first' to run the first available formatter from the list
-      -- javascript = { "prettierd", "prettier", stop_after_first = true },
+      python = { 'isort', 'black' },
+
+      -- Add all JS/TS and React filetypes
+      javascript = { 'prettierd', 'prettier', stop_after_first = true },
+      typescript = { 'prettierd', 'prettier', stop_after_first = true },
+      javascriptreact = { 'prettierd', 'prettier', stop_after_first = true },
+      typescriptreact = { 'prettierd', 'prettier', stop_after_first = true },
+
+      -- Tell Go to use goimports and fallback to the built-in gofmt
+      go = { 'goimports', 'gofmt' },
     },
   }
 
@@ -846,7 +877,7 @@ do
       -- <c-k>: Toggle signature help
       --
       -- See `:help blink-cmp-config-keymap` for defining your own keymap
-      preset = 'default',
+      preset = 'super-tab',
 
       -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
       --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
@@ -861,7 +892,7 @@ do
     completion = {
       -- By default, you may press `<c-space>` to show the documentation.
       -- Optionally, set `auto_show = true` to show the documentation after a delay.
-      documentation = { auto_show = false, auto_show_delay_ms = 500 },
+      documentation = { auto_show = true, auto_show_delay_ms = 500 },
     },
 
     sources = {
@@ -960,17 +991,17 @@ do
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug'
-  -- require 'kickstart.plugins.indent_line'
-  -- require 'kickstart.plugins.lint'
-  -- require 'kickstart.plugins.autopairs'
+  require 'kickstart.plugins.debug'
+  require 'kickstart.plugins.indent_line'
+  require 'kickstart.plugins.lint'
+  require 'kickstart.plugins.autopairs'
   -- require 'kickstart.plugins.neo-tree'
-  -- require 'kickstart.plugins.gitsigns' -- adds gitsigns recommended keymaps
+  require 'kickstart.plugins.gitsigns' -- adds gitsigns recommended keymaps
 
   -- NOTE: You can add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- require 'custom.plugins'
+  require 'custom.plugins'
 end
 
 -- The line beneath this is called `modeline`. See `:help modeline`
