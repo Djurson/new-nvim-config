@@ -5,10 +5,10 @@ vim.pack.add { 'https://github.com/mfussenegger/nvim-lint' }
 local lint = require 'lint'
 lint.linters_by_ft = {
   markdown = { 'markdownlint' },
-  
+
   -- Add your new linters here:
   python = { 'ruff' },
-  go = { 'golangci-lint' },
+  -- go = { 'golangcilint' },
   javascript = { 'eslint_d' },
   typescript = { 'eslint_d' },
   javascriptreact = { 'eslint_d' },

@@ -13,10 +13,18 @@ end
 
 vim.pack.add(plugins)
 
-vim.keymap.set('n', '\\', '<Cmd>Neotree reveal<CR>', { desc = 'NeoTree reveal', silent = true })
+vim.keymap.set('n', '<leader>tft', '<Cmd>Neotree focus<CR>', { desc = '[T]oggle [F]ocus [T]ree', silent = true })
+vim.keymap.set('n', '<leader>tt', '<Cmd>Neotree toggle<CR>', { desc = '[T]oggle Neo[t]ree', silent = true })
 
 require('neo-tree').setup {
+  close_if_last_window = true,
   filesystem = {
+    hijack_netrw_behavior = 'disabled',
+    filtered_items = {
+      hide_hidden = false,
+      hide_dotfiles = false,
+      hide_gitignored = false,
+    },
     window = {
       mappings = {
         ['\\'] = 'close_window',

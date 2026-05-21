@@ -110,7 +110,7 @@ do
   vim.o.number = true
   -- You can also add relative line numbers, to help with jumping.
   --  Experiment for yourself to see if you like it!
-  -- vim.o.relativenumber = true
+  vim.o.relativenumber = true
 
   -- Enable mouse mode, can be useful for resizing splits for example!
   vim.o.mouse = 'a'
@@ -372,6 +372,7 @@ do
     spec = {
       { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
       { '<leader>t', group = '[T]oggle' },
+      { '<leader>r', group = '[R]eel (Harpoon)' },
       { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } }, -- Enable gitsigns recommended keymaps first
       { 'gr', group = 'LSP Actions', mode = { 'n' } },
     },
@@ -396,20 +397,23 @@ do
   --   },
   -- }
 
-  vim.pack.add {
-    'https://github.com/navarasu/onedark.nvim',
+  vim.pack.add { 'https://github.com/catppuccin/nvim' }
+  require('catppuccin').setup {
+    flavour = 'mocha',
+    integrations = {
+      blink_cmp = true,
+      gitsigns = true,
+      mason = true,
+      neotree = true,
+      noice = true,
+      notify = true,
+      render_markdown = true,
+      telescope = { enabled = true },
+      treesitter = true,
+      which_key = true,
+    },
   }
-  require('onedark').setup {
-    style = 'darker',
-  }
-  require('onedark').load()
-
-  -- Load the colorscheme here.
-  -- Like many other themes, this one has different styles, and you could load
-  -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-  -- vim.cmd.colorscheme 'tokyonight-night'
-  -- vim.cmd.colorscheme 'github_dark'
-  vim.cmd.colorscheme 'onedark'
+  vim.cmd.colorscheme 'catppuccin'
 
   -- Highlight todo, notes, etc in comments
   vim.pack.add { gh 'folke/todo-comments.nvim' }
@@ -453,6 +457,8 @@ do
   -- cursor location to LINE:COLUMN
   ---@diagnostic disable-next-line: duplicate-set-field
   statusline.section_location = function() return '%2l:%-2v' end
+
+  require('mini.animate').setup()
 
   -- ... and there is more!
   --  Check out: https://github.com/nvim-mini/mini.nvim
@@ -500,15 +506,14 @@ do
 
   -- See `:help telescope` and `:help telescope.setup()`
   require('telescope').setup {
-    -- You can put your default mappings / updates / etc. in here
-    --  All the info you're looking for is in `:help telescope.setup()`
-    --
-    -- defaults = {
-    --   mappings = {
-    --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-    --   },
-    -- },
-    -- pickers = {}
+    defaults = {
+      file_ignore_patterns = { '%.git/', '%.DS_Store' },
+    },
+    pickers = {
+      find_files = { hidden = true },
+      live_grep = { additional_args = { '--hidden', '--glob=!.git' } },
+      grep_string = { additional_args = { '--hidden', '--glob=!.git' } },
+    },
     extensions = {
       ['ui-select'] = { require('telescope.themes').get_dropdown() },
     },
@@ -693,6 +698,24 @@ do
       if client and client:supports_method('textDocument/inlayHint', event.buf) then
         map('<leader>th', function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf }) end, '[T]oggle Inlay [H]ints')
       end
+
+      -- Show hover documentation (type info, signatures, docs) for the symbol under the cursor.
+      -- Press K manually, or it auto-appears after the cursor rests for `updatetime` ms.
+      if client and client:supports_method('textDocument/hover', event.buf) then
+        map('K', vim.lsp.buf.hover, 'Hover Documentation')
+        local hover_augroup = vim.api.nvim_create_augroup('kickstart-lsp-hover', { clear = false })
+        vim.api.nvim_create_autocmd('CursorHold', {
+          buffer = event.buf,
+          group = hover_augroup,
+          callback = function() vim.lsp.buf.hover { focus = false } end,
+        })
+        vim.api.nvim_create_autocmd('LspDetach', {
+          group = vim.api.nvim_create_augroup('kickstart-lsp-hover-detach', { clear = true }),
+          callback = function(event2)
+            vim.api.nvim_clear_autocmds { group = 'kickstart-lsp-hover', buffer = event2.buf }
+          end,
+        })
+      end
     end,
   })
 
@@ -800,18 +823,7 @@ do
   vim.pack.add { gh 'stevearc/conform.nvim' }
   require('conform').setup {
     notify_on_error = false,
-    format_on_save = function(bufnr)
-      -- You can specify filetypes to autoformat on save here:
-      local enabled_filetypes = {
-        lua = true,
-        python = true,
-      }
-      if enabled_filetypes[vim.bo[bufnr].filetype] then
-        return { timeout_ms = 500 }
-      else
-        return nil
-      end
-    end,
+    format_on_save = { timeout_ms = 500 },
     default_format_opts = {
       lsp_format = 'fallback', -- Use external formatters if configured below, otherwise use LSP formatting. Set to `false` to disable LSP formatting entirely.
     },
@@ -995,7 +1007,7 @@ do
   require 'kickstart.plugins.indent_line'
   require 'kickstart.plugins.lint'
   require 'kickstart.plugins.autopairs'
-  -- require 'kickstart.plugins.neo-tree'
+  require 'kickstart.plugins.neo-tree'
   require 'kickstart.plugins.gitsigns' -- adds gitsigns recommended keymaps
 
   -- NOTE: You can add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
