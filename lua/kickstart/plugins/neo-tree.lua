@@ -14,7 +14,7 @@ end
 vim.pack.add(plugins)
 
 vim.keymap.set('n', '<leader>tft', '<Cmd>Neotree focus<CR>', { desc = '[T]oggle [F]ocus [T]ree', silent = true })
-vim.keymap.set('n', '<leader>tt', '<Cmd>Neotree toggle<CR>', { desc = '[T]oggle Neo[t]ree', silent = true })
+vim.keymap.set('n', '<leader>tst', '<Cmd>Neotree toggle<CR>', { desc = '[T]oggle [S]how Neotree', silent = true })
 
 require('neo-tree').setup {
   close_if_last_window = true,

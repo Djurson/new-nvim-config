@@ -11,4 +11,5 @@ vim.keymap.set('n', '<leader>r1', function() harpoon:list():select(1) end, { des
 vim.keymap.set('n', '<leader>r2', function() harpoon:list():select(2) end, { desc = '[R]eel to file 2' })
 vim.keymap.set('n', '<leader>r3', function() harpoon:list():select(3) end, { desc = '[R]eel to file 3' })
 vim.keymap.set('n', '<leader>r4', function() harpoon:list():select(4) end, { desc = '[R]eel to file 4' })
-
+vim.keymap.set('n', '<leader>r5', function() harpoon:list():select(5) end, { desc = '[R]eel to file 5' })
+vim.keymap.set('n', '<leader>r6', function() harpoon:list():select(6) end, { desc = '[R]eel to file 6' })
